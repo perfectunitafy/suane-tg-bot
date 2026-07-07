@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import Router, types, F
 from bot.config import client
 import logging
@@ -11,8 +12,9 @@ async def ai_handler(message: types.Message):
         prompt = message.text.lower().replace("суанэ", "").replace("suane", "").strip()
         if not prompt: prompt = message.text
         
-        # Используем gemini-3.1-flash-lite (актуальная для бота)
-        response = client.models.generate_content(
+        # Используем asyncio.to_thread, чтобы не блокировать event loop
+        response = await asyncio.to_thread(
+            client.models.generate_content,
             model="gemini-3.1-flash-lite",
             contents=prompt
         )
