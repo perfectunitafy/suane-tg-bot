@@ -1,19 +1,20 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.types import ChatPermissions
-from aiogram.enums import ChatMemberStatus
 from datetime import datetime, timedelta
+from bot.whitelist import ALLOWED_USERS, ALLOWED_CHATS
 
 router = Router()
 
-async def is_admin(message: types.Message) -> bool:
-    # Проверка, является ли пользователь админом или создателем
-    member = await message.bot.get_chat_member(message.chat.id, message.from_user.id)
-    return member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
+async def check_permissions(message: types.Message) -> bool:
+    if message.from_user.id not in ALLOWED_USERS and message.chat.id not in ALLOWED_CHATS:
+        await message.answer("У вас нет прав для выполнения этой команды.")
+        return False
+    return True
 
 @router.message(Command("ban"))
 async def cmd_ban(message: types.Message):
-    if not await is_admin(message):
+    if not await check_permissions(message):
         return
     if not message.reply_to_message:
         await message.answer("Ответьте на сообщение пользователя для бана.")
@@ -26,7 +27,7 @@ async def cmd_ban(message: types.Message):
 
 @router.message(Command("mute"))
 async def cmd_mute(message: types.Message):
-    if not await is_admin(message):
+    if not await check_permissions(message):
         return
     if not message.reply_to_message:
         await message.answer("Ответьте на сообщение для мута.")
@@ -59,7 +60,7 @@ async def cmd_mute(message: types.Message):
 
 @router.message(Command("unmute"))
 async def cmd_unmute(message: types.Message):
-    if not await is_admin(message):
+    if not await check_permissions(message):
         return
     if not message.reply_to_message:
         await message.answer("Ответьте на сообщение для снятия мута.")

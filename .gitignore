@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 venv/
 .docker-compose.yml.swp
+bot/whitelist.py
