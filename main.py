@@ -3,7 +3,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
 import os
-from bot.handlers import commands, ai, admin
+from bot.handlers import commands, ai, admin, system
 
 async def main():
     load_dotenv()
@@ -13,7 +13,7 @@ async def main():
     dp = Dispatcher()
     
     # Регистрация с приоритетом
-    dp.include_routers(commands.router, ai.router, admin.router)
+    dp.include_routers(system.router, commands.router, ai.router, admin.router)
     
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
