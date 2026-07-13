@@ -6,7 +6,10 @@ import logging
 router = Router()
 logger = logging.getLogger(__name__)
 
-@router.message(F.text & ~F.text.startswith("/") & (F.reply_to_message | F.text.regexp(r"(?i)суанэ|suane")))
+@router.message(F.text & ~F.text.startswith("/") & (
+    (F.reply_to_message.from_user.id == 8890656752) |  # 8890656752 - ID Суанэ
+    F.text.regexp(r"(?i)суанэ|suane")
+))
 async def ai_handler(message: types.Message):
     try:
         prompt = message.text.lower().replace("суанэ", "").replace("suane", "").strip()
