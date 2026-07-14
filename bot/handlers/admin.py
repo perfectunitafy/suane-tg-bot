@@ -10,8 +10,13 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 async def check_permissions(message: types.Message) -> bool:
-    if message.from_user.id not in ALLOWED_USERS and message.chat.id not in ALLOWED_CHATS:
+    # Команды разрешены только админам из ALLOWED_USERS
+    if message.from_user.id not in ALLOWED_USERS:
         await message.answer("У вас нет прав для выполнения этой команды.")
+        return False
+    # И только в разрешенных чатах
+    if message.chat.id not in ALLOWED_CHATS:
+        await message.answer("В этом чате использование админ-команд запрещено.")
         return False
     return True
 
@@ -81,18 +86,14 @@ async def cmd_unmute(message: types.Message):
 
 @router.message(Command("warn"))
 async def cmd_warn(message: types.Message):
-    logger.info("DEBUG: Запущена команда /warn")
     if not await check_permissions(message): 
-        logger.info("DEBUG: Отказано в правах")
         return
     if not message.reply_to_message:
         await message.answer("Ответьте на сообщение для предупреждения.")
         return
     target = message.reply_to_message.from_user
-    logger.info(f"DEBUG: Выполняю add_warn для пользователя {target.id}")
     await db_service.add_warn(target.id, message.chat.id)
     count = await db_service.get_warns(target.id, message.chat.id)
-    logger.info(f"DEBUG: Получен новый счетчик: {count}")
     
     msg = f"Пользователь {target.first_name} получил предупреждение ({count}/3)."
     if count >= 3:

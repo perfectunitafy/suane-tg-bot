@@ -7,10 +7,14 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 @router.message(F.text & ~F.text.startswith("/") & (
-    (F.reply_to_message.from_user.id == 8890656752) |  # 8890656752 - ID Суанэ
+    (F.reply_to_message.from_user.id == 8890656752) |
     F.text.regexp(r"(?i)суанэ|suane")
 ))
 async def ai_handler(message: types.Message):
+    # Проверка, что чат в разрешенных
+    from bot.whitelist import ALLOWED_CHATS
+    if message.chat.id not in ALLOWED_CHATS:
+        return
     try:
         prompt = message.text.lower().replace("суанэ", "").replace("suane", "").strip()
         if not prompt: prompt = message.text
